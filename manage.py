@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'agv_main.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'agv_web_01.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
