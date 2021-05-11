@@ -20,3 +20,6 @@ def static_js(request):
 
 def bootstrap(request):
     return render(request, 'bootstrap.html')
+
+def login(request):
+    return render(request, 'login.html')

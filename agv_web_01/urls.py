@@ -23,4 +23,5 @@ urlpatterns = [
     path('static-css/', views.static_css),
     path('static-js/', views.static_js),
     path('bootstrap/', views.bootstrap),
+    path('login/', views.login),
 ]
