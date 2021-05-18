@@ -41,8 +41,51 @@
         $(function() {
         $('#btnSignin').click(function() {
             $('#modalSignin').modal();
+            });
         });
-    });
+
+        $(function() {
+            $('#btnAddQueue').click(function() {
+                $('#modalAddQueue').modal();
+            });
+        });
+
+
+        $(document).ready(function(){
+            $('#modalSignin').keypress(function(e){
+                if(e.keyCode==13)
+            $('#btnLogin').click();
+                });
+        });
+
+    function ajaxSubmitLogin() {
+        login = document.querySelector('#login').value;
+        pswd = document.querySelector('#pswd').value;
+        axios({
+            url: '{% url "index" %}',  //หรือ url: ''
+            method: 'get',
+            params: {'login':login, 'pswd':pswd},
+            timeout: 5000,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+            var msg = '';
+            if (response.data.loginstatus == true) {
+                //msg = 'ข้อมูลถูกต้อง';
+                location.href = "#";
+                $('#modalSignin').modal('hide');         
+            } else {
+                document.getElementById("msg").style.color = 'red';
+                msg = 'ข้อมูลไม่ถูกต้อง';
+                
+            }
+
+            document.getElementById('msg').innerHTML = msg;
+        })
+        .catch(error => {
+            alert(error);
+        });
+    }   
     </script>
 {% endblock %}
 
@@ -51,16 +94,15 @@
     <h5 class="my-0 mr-md-auto font-weight-normal">PlanToys AGV</h5>
 
 	<div class="dropright float-left">
-        <button 	class="btn dropdown-toggle" 
-                     type="button" 	data-toggle="dropdown">AGV-01</button>
-       
+        <button class="btn dropdown-toggle"
+                     type="button" data-toggle="dropdown">โปรดเลือกหมายเลข AGV</button>
             <div class="dropdown-menu">
-               <a class="dropdown-item" href="#">AGV-01</a>
-               <a class="dropdown-item" href="#">AGV-02</a>
-               <a class="dropdown-item" href="#">AGV-03</a>
+                {% for anum in agvlist %}
+                    <a class="dropdown-item" >AGV-{{anum}}</a>
+                {% endfor %}
             </div>
    </div>
-    <div class="my-2 my-md-0 mr-md-3">
+    <div id="btnAddQueue" class="my-2 my-md-0 mr-md-3">
           <a class="p-2 text-dark" href="#">เพิ่มคิว</a>
     </div>
     <a id="btnSignin" class="btn btn-outline-primary" >เข้าสู่ระบบ</a>
@@ -111,9 +153,6 @@
 
     <br>
 
-
-
-
 </div>
 </div>
 
@@ -129,38 +168,18 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td>1</td>
-			<td>000001</td>
-			<td>35,000</td>
-			<td>งานอัดPW</td>
-            <td>งานสี</td>
-            <td>plant4pw</td>
-		</tr>
-		<tr>
-			<td>2</td>
-			<td>000002</td>
-			<td>29,000</td>
-			<td>งานพิมพ์</td>
-            <td>งานตกแต่ง1</td>
-            <td>plant4sc</td>
-		</tr>			
-		<tr>
-			<td>3</td>
-			<td>000003</td>
-			<td>85,000</td>
-			<td>งานตกแต่ง2</td>
-            <td>งานประกอบใหญ่</td>
-            <td>plant4d2</td>
-		</tr>
-		<tr>
-			<td>4</td>
-			<td>000004</td>
-			<td>13,000</td>
-			<td>QA ประกอบใหญ่</td>
-            <td>งานประกอบใหญ่</td>
-            <td>plant4qa</td>
-		</tr>
+        {% for rw in queue %}
+            <tr>
+                <td></td>
+                <td>{{rw.job}}</td>
+                <td>{{rw.quantity}}</td>
+                <td>{{rw.from}}</td>
+                <td>{{rw.to}}</td>
+                <td>{{rw.user}}</td>
+            </tr>
+
+        {% endfor %}
+
 	</tbody>
 	</table>
 
@@ -193,7 +212,7 @@
                   <h5>ติดต่อ</h5>
                   <ul class="list-unstyled text-small">
                         <li><a class="text-muted" href="#">ทีมผู้พัฒนา</a></li>
-                        <li><a class="text-muted" href="#">หน่วยงานซ่อมบำรุง</a></li>
+                        <li><a class="text-muted" href="#">{{agvlist}}</a></li>
 
                   </ul>
             </div>
@@ -207,13 +226,14 @@
         <div class="modal-dialog">
            <div class="modal-content">
                <div class="modal-header">
-                   <h5 class="modal-title">สมาชิกเข้าสู่ระบบ</h5>
+                   <h5 class="modal-title">ลงชื่อเข้าสู่ระบบ</h5>
                    <button class="close" data-dismiss="modal">
                        <span aria-hidden="true">&times;</span>
                    </button>
                </div>
                <div class="modal-body">
                <form>
+                <div id="msg"></div><br>
                    <div class="form-group">
                        <label for="login">ชื่อผู้ใช้:</label>
                        <input 	type="text" id="login"
@@ -227,7 +247,72 @@
                </form>
                </div>
                <div class="modal-footer">
-                   <button class="btn btn-primary">เข้าสู่ระบบ</button>
+                   <button class="btn btn-primary" id="btnLogin" onclick="ajaxSubmitLogin()" >เข้าสู่ระบบ</button>
+               </div>
+           </div>
+      </div>
+      </div>
+
+      <div id="modalAddQueue" class="modal fade">
+        <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">เพิ่มคิว</h5>
+                   <button class="close" data-dismiss="modal">
+                       <span aria-hidden="true">&times;</span>
+                   </button>
+               </div>
+               <div class="modal-body">
+               <form>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="job">หมายเลขงาน</label>
+                        <input type="text" class="form-control" id="job" placeholder="" required>
+                        <div class="invalid-feedback">
+                              Job number required.
+                        </div>
+                      </div>
+                      <div class="col-md-6 mb-4">
+                        <label for="qty">จำนวนที่ส่ง</label>
+                        <input type="text" class="form-control" id="qty" placeholder="" required>
+                        <div class="invalid-feedback">
+                              Quantity required.
+                        </div>
+                      </div>
+                    <div class="col-md-6 mb-4">
+                      <label for="fromStation">ส่งจากสถานี</label>
+                      <select class="custom-select d-block w-100" id="fromStation" required>
+                            <option value="">โปรดเลือก...</option>
+                            {% for r in station %}
+                                <option>{{r}}</option>
+                                
+                            {% endfor %}
+                      </select>
+                  <div class="invalid-feedback">
+                            Please select original station.
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                      <label for="toStation">ไปยังสถานี</label>
+                      <select class="custom-select d-block w-100" id="toStation" required>
+                            <option value="">โปรดเลือก...</option>
+                            {% for r in station %}
+                                <option>{{r}}</option>
+                                
+                            {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">
+                            Please select destination station.
+                      </div>
+                    </div>
+
+              </div>
+          
+               </form>
+               </div>
+               <div class="modal-footer">
+                    <button class="btn btn-info">เพิ่มหมายเลขงาน</button>
+                   <button class="btn btn-primary">ตกลง</button>
                </div>
            </div>
       </div>

@@ -18,7 +18,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index),
+    path('', views.index, name="index"),
     path('static-media/', views.static_media),
     path('static-css/', views.static_css),
     path('static-js/', views.static_js),
